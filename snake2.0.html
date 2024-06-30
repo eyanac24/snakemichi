@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Snake Game</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #fff; /* Cambiado a blanco */
+    }
+    canvas {
+      border: 1px solid #000; /* Cambiado a negro */
+      background-color: #fff; /* Cambiado a blanco */
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <audio id="eatSound" src="https://www.zapsplat.com/wp-content/uploads/2015/sound-effects-77317/zapsplat_cartoon_character_laugh_high_pitched_mouse_or_similar_crazy_005_79750.mp3"></audio>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const context = canvas.getContext('2d');
+    const eatSound = document.getElementById('eatSound');
+
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
+    
+    const snakeImg = new Image();
+    snakeImg.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMso-QRWsN4L4iOgNfDkoHcAgY-nLUYY8L6g&s'; // URL de la imagen de la serpiente
+
+    const foodImg = new Image();
+    foodImg.src = 'https://w7.pngwing.com/pngs/900/58/png-transparent-minnie-mouse-house-mouse-pic-of-mice-mammal-fauna-mouse-thumbnail.png'; // URL de la imagen de la comida
+
+    let snake = [{x: 10, y: 10}];
+    let direction = {x: 0, y: 0};
+    let food = {x: 15, y: 15};
+    let score = 0;
+
+    function gameLoop() {
+      update();
+      draw();
+    }
+
+    function update() {
+      const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+      
+      if (head.x === food.x && head.y === food.y) {
+        score++;
+        snake.push({});
+        food = {
+          x: Math.floor(Math.random() * tileCount),
+          y: Math.floor(Math.random() * tileCount)
+        };
+        eatSound.play();
+      } else {
+        snake.pop();
+      }
+
+      if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount || snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+        resetGame();
+        return;
+      }
+
+      snake.unshift(head);
+    }
+
+    function draw() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      snake.forEach((segment, index) => {
+        context.drawImage(snakeImg, segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+      });
+
+      context.drawImage(foodImg, food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+    }
+
+    function resetGame() {
+      snake = [{x: 10, y: 10}];
+      direction = {x: 0, y: 0};
+      score = 0;
+    }
+
+    window.addEventListener('keydown', e => {
+      switch (e.key) {
+        case 'ArrowUp':
+          if (direction.y === 0) direction = {x: 0, y: -1};
+          break;
+        case 'ArrowDown':
+          if (direction.y === 0) direction = {x: 0, y: 1};
+          break;
+        case 'ArrowLeft':
+          if (direction.x === 0) direction = {x: -1, y: 0};
+          break;
+        case 'ArrowRight':
+          if (direction.x === 0) direction = {x: 1, y: 0};
+          break;
+      }
+    });
+
+    setInterval(gameLoop, 100);
+  </script>
+</body>
+</html>
